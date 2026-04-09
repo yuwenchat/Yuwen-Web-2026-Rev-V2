@@ -51,10 +51,16 @@ pnpm dev
 - API 层已搭建完整模块结构、核心 REST 路由、Socket Gateway、邮件 provider 接口和 Prisma schema
 - E2EE 只做了协议与视觉预留，首版文案不会误导成“端对端加密已开启”
 
+## 部署文档
+
+- 宝塔面板 + Ubuntu 22.04 小白部署：`deploy/baota/BAOTA-UBUNTU-22.04.md`
+- PM2 模板：`deploy/baota/ecosystem.config.cjs.example`
+- Web 生产环境模板：`deploy/baota/web.env.production.example`
+- API 生产环境模板：`deploy/baota/api.env.production.example`
+
 ## 后续建议
 
 - 安装依赖后先运行 `pnpm typecheck && pnpm test`
 - 确认飞书 SMTP 授权配置是否已开启
 - 补全 Redis presence/typing 状态存储与队列化限流
 - 用真实数据库和前端 API client 替换演示数据
-

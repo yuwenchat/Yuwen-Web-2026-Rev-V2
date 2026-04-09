@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthIntentPurpose {
+  REGISTER
+  LOGIN
+}
+
+enum AuthIntentChannel {
+  CODE
+  MAGIC_LINK
+}
+
+enum DevicePlatform {
+  WEB
+  IOS
+  ANDROID
+}
+
+enum DeviceTrustState {
+  TRUSTED
+  PENDING
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ConversationKind {
+  DIRECT
+}
+
+enum SecurityMode {
+  TRANSPORT_PROTECTED
+  E2EE_READY
+  E2EE_VERIFIED
+}
+
+enum MessagePayloadFormat {
+  PLAIN_TEXT
+}
+
+enum MessageEncryptionState {
+  NOT_ENCRYPTED
+  TRANSPORT_ENCRYPTED
+  END_TO_END_READY
+  END_TO_END_VERIFIED
+}
+
+enum TombstoneType {
+  NONE
+  DELETED
+}
+
+model User {
+  id                String               @id @default(cuid())
+  primaryEmail      String               @unique
+  emailVerifiedAt   DateTime?
+  friendCode        String               @unique
+  handle            String               @unique
+  displayName       String
+  bio               String               @default("")
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  passwordCredential PasswordCredential?
+  friendCodeRotations FriendCodeRotation[]
+  devices           Device[]
+  sessions          DeviceSession[]
+  sentFriendRequests FriendRequest[]     @relation("friend_request_sender")
+  receivedFriendRequests FriendRequest[] @relation("friend_request_recipient")
+  sentMessages      Message[]            @relation("message_sender")
+  messageVisibilities MessageVisibility[]
+  readStates        ReadState[]
+  conversationParticipants ConversationParticipant[]
+  friendshipsLow    Friendship[]         @relation("friendship_low")
+  friendshipsHigh   Friendship[]         @relation("friendship_high")
+}
+
+model PasswordCredential {
+  userId       String   @id
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuthIntent {
+  id             String            @id @default(cuid())
+  email          String
+  purpose        AuthIntentPurpose
+  channel        AuthIntentChannel
+  codeHash       String?
+  magicTokenHash String?
+  redirectTo     String?
+  expiresAt      DateTime
+  consumedAt     DateTime?
+  ipHash         String?
+  uaHash         String?
+  attempts       Int               @default(0)
+  deviceName     String?
+  createdAt      DateTime          @default(now())
+
+  @@index([email, purpose, channel, createdAt])
+}
+
+model FriendCodeRotation {
+  id        String   @id @default(cuid())
+  userId    String
+  oldCode   String
+  newCode   String
+  rotatedAt DateTime @default(now())
+  ipHash    String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Device {
+  id         String           @id @default(cuid())
+  userId     String
+  platform   DevicePlatform   @default(WEB)
+  name       String
+  trustState DeviceTrustState @default(TRUSTED)
+  lastSeenAt DateTime         @default(now())
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions   DeviceSession[]
+  messages   Message[]
+}
+
+model DeviceSession {
+  id               String   @id @default(cuid())
+  userId           String
+  deviceId         String
+  accessTokenHash  String   @unique
+  refreshTokenHash String   @unique
+  expiresAt        DateTime
+  refreshExpiresAt DateTime
+  lastSeenAt       DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device           Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+}
+
+model FriendRequest {
+  id          String              @id @default(cuid())
+  senderId    String
+  recipientId String
+  status      FriendRequestStatus @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  sender      User                @relation("friend_request_sender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient   User                @relation("friend_request_recipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, recipientId, status])
+}
+
+model Friendship {
+  id         String   @id @default(cuid())
+  userLowId  String
+  userHighId String
+  createdAt  DateTime @default(now())
+  userLow    User     @relation("friendship_low", fields: [userLowId], references: [id], onDelete: Cascade)
+  userHigh   User     @relation("friendship_high", fields: [userHighId], references: [id], onDelete: Cascade)
+
+  @@unique([userLowId, userHighId])
+}
+
+model Conversation {
+  id           String                    @id @default(cuid())
+  kind         ConversationKind          @default(DIRECT)
+  directPairKey String                   @unique
+  securityMode SecurityMode              @default(TRANSPORT_PROTECTED)
+  lastMessageId String?
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  participants ConversationParticipant[]
+  messages     Message[]
+  readStates   ReadState[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id                   String                 @id @default(cuid())
+  conversationId       String
+  senderUserId         String
+  senderDeviceId       String?
+  payload              Json
+  payloadFormat        MessagePayloadFormat   @default(PLAIN_TEXT)
+  encryptionState      MessageEncryptionState @default(TRANSPORT_ENCRYPTED)
+  sentAt               DateTime               @default(now())
+  editedAt             DateTime?
+  deletedForEveryoneAt DateTime?
+  tombstoneType        TombstoneType          @default(NONE)
+  conversation         Conversation           @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderUser           User                   @relation("message_sender", fields: [senderUserId], references: [id], onDelete: Cascade)
+  senderDevice         Device?                @relation(fields: [senderDeviceId], references: [id], onDelete: SetNull)
+  visibilities         MessageVisibility[]
+
+  @@index([conversationId, sentAt])
+}
+
+model MessageVisibility {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  hiddenAt  DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+}
+
+model ReadState {
+  id                String       @id @default(cuid())
+  conversationId    String
+  userId            String
+  lastReadMessageId String
+  readAt            DateTime     @default(now())
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+}
+

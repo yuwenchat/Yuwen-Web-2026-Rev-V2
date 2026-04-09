@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@yuwen/protocol": [
+        "packages/protocol/src/index.ts"
+      ],
+      "@yuwen/chat-core": [
+        "packages/chat-core/src/index.ts"
+      ],
+      "@yuwen/design-system": [
+        "packages/design-system/src/index.ts"
+      ],
+      "@yuwen/crypto": [
+        "packages/crypto/src/index.ts"
+      ]
+    }
+  }
+}
+

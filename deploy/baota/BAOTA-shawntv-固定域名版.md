@@ -10,6 +10,18 @@
 
 你这次部署时，直接照着做就行，不需要自己再替换域名。
 
+先直接回答你这个问题：
+
+- 可以，`服务器公网 IP`、`飞书邮箱`、`飞书 SMTP 授权码`、`管理员邮箱` 这几个信息，完全可以尽量用图形界面填写
+- `服务器公网 IP`：是在 `Cloudflare` 后台图形界面里填
+- `飞书邮箱 / SMTP 授权码 / 管理员邮箱`：是在 `宝塔文件管理器` 里打开 `.env.production` 文件直接编辑
+- 也就是说，这几个值不一定要用命令行改
+
+你可以把它理解成：
+
+- Cloudflare 负责“填 IP”
+- 宝塔负责“填邮箱和管理员”
+
 ---
 
 ## 1. Cloudflare 先加两条 DNS
@@ -168,7 +180,16 @@ cd /www/wwwroot/chat2.shawntv.co
 cp deploy/baota/web.env.shawntv.production.example apps/web/.env.production
 ```
 
-如果你想手动确认内容，打开：
+复制完以后，不一定要用命令行改。
+
+你可以直接在宝塔图形界面里改：
+
+1. 左侧点 `文件`
+2. 进入 `/www/wwwroot/chat2.shawntv.co/apps/web/`
+3. 找到 `.env.production`
+4. 点 `编辑`
+
+如果你想用命令行，也可以再打开：
 
 ```bash
 nano apps/web/.env.production
@@ -192,7 +213,14 @@ cd /www/wwwroot/chat2.shawntv.co
 cp deploy/baota/api.env.shawntv.production.example apps/api/.env.production
 ```
 
-再编辑：
+复制完以后，推荐你直接用宝塔图形界面修改：
+
+1. 左侧点 `文件`
+2. 进入 `/www/wwwroot/chat2.shawntv.co/apps/api/`
+3. 找到 `.env.production`
+4. 点 `编辑`
+
+如果你想用命令行，也可以再编辑：
 
 ```bash
 nano apps/api/.env.production
@@ -224,6 +252,59 @@ ADMIN_EMAILS="hello@shawntv.co"
 
 - 项目可以先跑起来
 - 只是验证码和 Magic Link 邮件暂时发不出去
+
+### 9.1 你现在真正只要改这 4 个值
+
+在宝塔图形界面打开：
+
+```bash
+/www/wwwroot/chat2.shawntv.co/apps/api/.env.production
+```
+
+然后只改这几行：
+
+```env
+MAIL_FROM_ADDRESS="你的飞书邮箱"
+MAIL_REPLY_TO="你的飞书邮箱"
+MAIL_SMTP_USER="你的飞书邮箱"
+MAIL_SMTP_PASSWORD="你的飞书 SMTP 授权码"
+ADMIN_EMAILS="你的管理员邮箱"
+```
+
+说明非常简单：
+
+- `MAIL_FROM_ADDRESS`：发件邮箱
+- `MAIL_REPLY_TO`：收件人点击“回复”时回到哪个邮箱
+- `MAIL_SMTP_USER`：SMTP 登录账号
+- `MAIL_SMTP_PASSWORD`：SMTP 授权码
+- `ADMIN_EMAILS`：谁能进管理后台
+
+如果目前你只打算自己先用：
+
+```env
+MAIL_FROM_ADDRESS="你的飞书邮箱"
+MAIL_REPLY_TO="你的飞书邮箱"
+MAIL_SMTP_USER="你的飞书邮箱"
+MAIL_SMTP_PASSWORD="你的飞书 SMTP 授权码"
+ADMIN_EMAILS="你的飞书邮箱"
+```
+
+也就是说，最简单情况下：
+
+- 飞书邮箱，填 4 次
+- SMTP 授权码，填 1 次
+- 管理员邮箱，填 1 次
+
+### 9.2 服务器公网 IP 在哪里填
+
+这个不是在项目文件里填。
+
+它是在 `Cloudflare -> DNS` 页面里填到这两条 A 记录里：
+
+- `chat2`
+- `yuwenapi2`
+
+所以你不用去宝塔文件里找“服务器公网 IP”这个配置项。
 
 ---
 

@@ -320,7 +320,7 @@ set -a
 source apps/api/.env.production
 set +a
 pnpm db:generate
-pnpm --filter @yuwen/api exec prisma db push --schema apps/api/prisma/schema.prisma
+pnpm db:push
 ```
 
 ---
@@ -530,7 +530,7 @@ cd /www/wwwroot/chat2.shawntv.co
 set -a
 source apps/api/.env.production
 set +a
-pnpm --filter @yuwen/api exec prisma db push --schema apps/api/prisma/schema.prisma
+pnpm db:push
 pm2 restart yuwen-api
 pm2 restart yuwen-web
 ```

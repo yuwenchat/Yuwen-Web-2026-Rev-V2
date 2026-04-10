@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import type { SecurityMode } from "@yuwen/protocol";
 
 export type DeviceKeyBundle = {
@@ -34,12 +32,53 @@ const emojiDeck = [
   "☁️"
 ] as const;
 
+function xmur3(input: string) {
+  let hash = 1779033703 ^ input.length;
+
+  for (let index = 0; index < input.length; index += 1) {
+    hash = Math.imul(hash ^ input.charCodeAt(index), 3432918353);
+    hash = (hash << 13) | (hash >>> 19);
+  }
+
+  return function nextSeed() {
+    hash = Math.imul(hash ^ (hash >>> 16), 2246822507);
+    hash = Math.imul(hash ^ (hash >>> 13), 3266489909);
+    return (hash ^= hash >>> 16) >>> 0;
+  };
+}
+
+function sfc32(a: number, b: number, c: number, d: number) {
+  return function nextRandom() {
+    a >>>= 0;
+    b >>>= 0;
+    c >>>= 0;
+    d >>>= 0;
+
+    const sum = (a + b + d) | 0;
+    d = (d + 1) | 0;
+    a = b ^ (b >>> 9);
+    b = (c + (c << 3)) | 0;
+    c = ((c << 21) | (c >>> 11)) | 0;
+    c = (c + sum) | 0;
+
+    return (sum >>> 0) / 4294967296;
+  };
+}
+
 export function emojiFingerprintFromSeed(seed: string, count = 6): string[] {
-  const digest = createHash("sha256").update(seed).digest();
+  // 首发阶段这里只做“可重复的视觉占位”，不能把它视为真实密钥指纹。
+  const seedFactory = xmur3(seed);
+  const random = sfc32(
+    seedFactory(),
+    seedFactory(),
+    seedFactory(),
+    seedFactory()
+  );
   const fingerprint: string[] = [];
 
   for (let index = 0; index < count; index += 1) {
-    fingerprint.push(emojiDeck[digest[index] % emojiDeck.length]);
+    const emojiIndex = Math.floor(random() * emojiDeck.length);
+    fingerprint.push(emojiDeck[emojiIndex] ?? emojiDeck[0]);
   }
 
   return fingerprint;

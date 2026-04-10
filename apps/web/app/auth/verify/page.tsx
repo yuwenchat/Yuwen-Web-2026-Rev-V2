@@ -3,16 +3,23 @@ import Link from "next/link";
 import { BrandLogo } from "../../../components/brand-logo";
 
 type VerifyPageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default function VerifyPage({ searchParams }: VerifyPageProps) {
+export default async function VerifyPage({ searchParams }: VerifyPageProps) {
+  const resolvedSearchParams = await searchParams;
   const purpose =
-    typeof searchParams?.purpose === "string" ? searchParams.purpose : "login";
+    typeof resolvedSearchParams?.purpose === "string"
+      ? resolvedSearchParams.purpose
+      : "login";
   const email =
-    typeof searchParams?.email === "string" ? searchParams.email : "you@example.com";
+    typeof resolvedSearchParams?.email === "string"
+      ? resolvedSearchParams.email
+      : "you@example.com";
   const token =
-    typeof searchParams?.token === "string" ? searchParams.token : "demo-token";
+    typeof resolvedSearchParams?.token === "string"
+      ? resolvedSearchParams.token
+      : "demo-token";
   const endpoint =
     purpose === "register"
       ? "/auth/register/consume-magic-link"

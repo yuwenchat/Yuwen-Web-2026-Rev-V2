@@ -1,3 +1,4 @@
+import type { ConversationSnapshot } from "@yuwen/chat-core";
 import { createChatState } from "@yuwen/chat-core";
 import type {
   Conversation,
@@ -180,20 +181,22 @@ const readStates: Record<string, ReadState | null> = {
 };
 
 export function buildDemoChatState() {
+  const snapshots: ConversationSnapshot[] = conversations.map((conversation) => ({
+    conversation,
+    participants: [currentUser, ...contacts].filter((user) =>
+      conversation.participantIds.includes(user.id)
+    ),
+    messages: messagesByConversation[conversation.id] ?? [],
+    readState: readStates[conversation.id] ?? null,
+    hiddenMessageIds: [],
+    typingUserIds: conversation.id === "conversation-he" ? [he.id] : []
+  }));
+
   return createChatState({
     selfUserId: currentUser.id,
     users: [currentUser, ...contacts],
     activeConversationId: conversations[0]!.id,
-    snapshots: conversations.map((conversation) => ({
-      conversation,
-      participants: [currentUser, ...contacts].filter((user) =>
-        conversation.participantIds.includes(user.id)
-      ),
-      messages: messagesByConversation[conversation.id],
-      readState: readStates[conversation.id],
-      hiddenMessageIds: [],
-      typingUserIds: conversation.id === "conversation-he" ? [he.id] : []
-    }))
+    snapshots
   });
 }
 

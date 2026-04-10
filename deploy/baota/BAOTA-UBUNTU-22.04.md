@@ -418,7 +418,7 @@ set -a
 source apps/api/.env.production
 set +a
 pnpm db:generate
-pnpm --filter @yuwen/api exec prisma db push --schema apps/api/prisma/schema.prisma
+pnpm db:push
 ```
 
 如果这里成功，说明：
@@ -914,7 +914,7 @@ cd /www/wwwroot/yuwen
 set -a
 source apps/api/.env.production
 set +a
-pnpm --filter @yuwen/api exec prisma db push --schema apps/api/prisma/schema.prisma
+pnpm db:push
 pm2 restart yuwen-api
 pm2 restart yuwen-web
 ```

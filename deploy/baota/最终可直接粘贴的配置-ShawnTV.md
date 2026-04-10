@@ -109,7 +109,7 @@ set -a
 source apps/api/.env.production
 set +a
 pnpm db:generate
-pnpm --filter @yuwen/api exec prisma db push --schema apps/api/prisma/schema.prisma
+pnpm db:push
 pnpm build:web
 pm2 restart yuwen-api
 pm2 restart yuwen-web

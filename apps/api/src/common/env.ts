@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+const optionalEmail = z.preprocess((value) => {
+  if (typeof value === "string" && value.trim() === "") {
+    return undefined;
+  }
+
+  return value;
+}, z.string().email().optional());
+
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   DATABASE_URL: z.string().min(1),
@@ -12,7 +20,7 @@ const envSchema = z.object({
   FRIEND_CODE_LENGTH: z.coerce.number().default(8),
   MAIL_FROM_NAME: z.string().default("语闻"),
   MAIL_FROM_ADDRESS: z.string().email(),
-  MAIL_REPLY_TO: z.string().email().optional(),
+  MAIL_REPLY_TO: optionalEmail,
   MAIL_SMTP_HOST: z.string().min(1),
   MAIL_SMTP_PORT: z.coerce.number().default(465),
   MAIL_SMTP_SECURE: z

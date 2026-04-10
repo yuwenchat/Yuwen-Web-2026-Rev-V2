@@ -454,6 +454,30 @@ proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection "upgrade";
 ```
 
+如果你在主配置文件里没看到，也先不要慌。
+
+宝塔的反向代理通常会单独写进这个 `include` 目录里：
+
+```nginx
+include /www/server/panel/vhost/nginx/proxy/yuwenapi2.shawntv.co/*.conf;
+```
+
+也就是说：
+
+- 主配置文件里看不到这三行，不代表没有反向代理
+- 这三行很可能在 `反向代理` 生成的单独 `.conf` 文件里
+
+最简单的检查方法：
+
+1. 先确认你已经在宝塔里给 `yuwenapi2.shawntv.co` 添加了反向代理
+2. 再看目录 `/www/server/panel/vhost/nginx/proxy/yuwenapi2.shawntv.co/`
+3. 打开里面的 `.conf` 文件，检查是否含有上面三行
+
+如果这个目录里根本没有 `.conf` 文件，通常说明：
+
+- 你还没有真正保存反向代理
+- 或者宝塔还没生成该站点的反向代理规则
+
 ---
 
 ## 14. 宝塔里申请 SSL

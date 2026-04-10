@@ -65,6 +65,10 @@ pnpm dev
 - Web 生产环境模板：`deploy/baota/web.env.production.example`
 - API 生产环境模板：`deploy/baota/api.env.production.example`
 
+## 技术文档
+
+- 技术架构详解：`docs/ARCHITECTURE.zh-CN.md`
+
 ## 后续建议
 
 - 安装依赖后先运行 `pnpm typecheck && pnpm test`

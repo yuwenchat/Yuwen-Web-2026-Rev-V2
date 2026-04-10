@@ -19,7 +19,24 @@ export const metadata: Metadata = {
   title: "语闻",
   description:
     "语闻是一个为安全、克制和长期可协同设备体验而设计的聊天产品。",
-  applicationName: "语闻"
+  applicationName: "语闻",
+  icons: {
+    icon: [
+      {
+        url: "/yuwen-logo.png",
+        sizes: "1024x1024",
+        type: "image/png"
+      }
+    ],
+    apple: [
+      {
+        url: "/yuwen-logo.png",
+        sizes: "1024x1024",
+        type: "image/png"
+      }
+    ],
+    shortcut: "/yuwen-logo.png"
+  }
 };
 
 export default function RootLayout({

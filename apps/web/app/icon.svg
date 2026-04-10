@@ -1,7 +1,8 @@
-<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="256" height="256" rx="64" fill="#18332D"/>
-  <path d="M71 74H185V144C185 168.301 165.301 188 141 188H115C90.6995 188 71 168.301 71 144V74Z" fill="#F5F1E8"/>
-  <path d="M101 106L128 141L155 106" stroke="#18332D" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="128" cy="78" r="14" fill="#D2B067"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <image
+    href="/yuwen-logo.png"
+    width="1024"
+    height="1024"
+    preserveAspectRatio="xMidYMid slice"
+  />
 </svg>
-

@@ -11,7 +11,11 @@ import {
   type AuthIntentPurpose,
   type AuthSession
 } from "@yuwen/protocol";
-import { DevicePlatform, type User as PrismaUser } from "@prisma/client";
+import {
+  DevicePlatform,
+  UserRole,
+  type User as PrismaUser
+} from "@prisma/client";
 
 import { appEnv } from "../common/env.js";
 import type { RequestMeta } from "../common/http.js";
@@ -359,6 +363,7 @@ export class AuthService {
       data: {
         primaryEmail: email,
         emailVerifiedAt: new Date(),
+        role: this.resolveUserRole(email),
         friendCode,
         handle,
         displayName,
@@ -371,7 +376,8 @@ export class AuthService {
     user: PrismaUser,
     deviceName: string
   ): Promise<AuthSession> {
-    const userId = user.id;
+    const syncedUser = await this.syncAdminRole(user);
+    const userId = syncedUser.id;
     const accessToken = randomToken(32);
     const refreshToken = randomToken(32);
     const expiresAt = new Date(
@@ -490,6 +496,31 @@ export class AuthService {
     if (purpose === "login" && !existingUser) {
       throw new NotFoundException("No account found for this email.");
     }
+  }
+
+  private resolveUserRole(email: string): UserRole {
+    return appEnv.adminEmails.includes(email.toLowerCase())
+      ? UserRole.ADMIN
+      : UserRole.USER;
+  }
+
+  private async syncAdminRole(user: PrismaUser): Promise<PrismaUser> {
+    const shouldBeAdmin = appEnv.adminEmails.includes(
+      user.primaryEmail.toLowerCase()
+    );
+
+    if (shouldBeAdmin && user.role !== UserRole.ADMIN) {
+      return this.prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          role: UserRole.ADMIN
+        }
+      });
+    }
+
+    return user;
   }
 
   private toPrismaPurpose(purpose: AuthIntentPurpose): "REGISTER" | "LOGIN" {

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AdminModule } from "./admin/admin.module.js";
 import { AuthModule } from "./auth/auth.module.js";
 import { CommonModule } from "./common/common.module.js";
 import { ConversationsModule } from "./conversations/conversations.module.js";
@@ -16,6 +17,7 @@ import { UsersModule } from "./users/users.module.js";
     CommonModule,
     MailModule,
     RealtimeModule,
+    AdminModule,
     AuthModule,
     UsersModule,
     FriendsModule,
@@ -24,4 +26,3 @@ import { UsersModule } from "./users/users.module.js";
   ]
 })
 export class AppModule {}
-

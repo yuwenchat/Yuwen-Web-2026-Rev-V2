@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  adminListQuerySchema,
   confirmCodeSchema,
   friendRequestCreateSchema,
   isFriendCode,
+  publicUserSchema,
   normalizeHandle
 } from "@yuwen/protocol";
 
@@ -30,5 +32,32 @@ describe("protocol helpers", () => {
         identifier: "@lin"
       }).identifier
     ).toBe("@lin");
+  });
+
+  it("applies defaults for admin list queries", () => {
+    expect(adminListQuerySchema.parse({}).limit).toBe(20);
+    expect(
+      adminListQuerySchema.parse({
+        q: "hello@example.com",
+        limit: "5"
+      }).limit
+    ).toBe(5);
+  });
+
+  it("requires an explicit user role on public user payloads", () => {
+    expect(
+      publicUserSchema.parse({
+        id: "user_1",
+        primaryEmail: "admin@example.com",
+        emailVerifiedAt: null,
+        role: "admin",
+        friendCode: "YW82Q4MN",
+        handle: "admin_user",
+        profile: {
+          displayName: "Admin User",
+          bio: ""
+        }
+      }).role
+    ).toBe("admin");
   });
 });

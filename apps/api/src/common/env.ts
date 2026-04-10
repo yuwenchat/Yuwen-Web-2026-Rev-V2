@@ -20,10 +20,22 @@ const envSchema = z.object({
     .optional()
     .transform((value) => value !== "false"),
   MAIL_SMTP_USER: z.string().min(1),
-  MAIL_SMTP_PASSWORD: z.string().min(1)
+  MAIL_SMTP_PASSWORD: z.string().min(1),
+  ADMIN_EMAILS: z.string().optional()
 });
 
 const parsed = envSchema.parse(process.env);
+
+function parseAdminEmails(value?: string): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+}
 
 export const appEnv = {
   port: parsed.PORT,
@@ -42,6 +54,6 @@ export const appEnv = {
   mailSmtpPort: parsed.MAIL_SMTP_PORT,
   mailSmtpSecure: parsed.MAIL_SMTP_SECURE,
   mailSmtpUser: parsed.MAIL_SMTP_USER,
-  mailSmtpPassword: parsed.MAIL_SMTP_PASSWORD
+  mailSmtpPassword: parsed.MAIL_SMTP_PASSWORD,
+  adminEmails: parseAdminEmails(parsed.ADMIN_EMAILS)
 } as const;
-

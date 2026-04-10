@@ -9,6 +9,7 @@ export const friendCodePattern = /^[A-Z2-9]{6,12}$/;
 
 export const authIntentPurposeSchema = z.enum(["register", "login"]);
 export const authIntentChannelSchema = z.enum(["code", "magic_link"]);
+export const userRoleSchema = z.enum(["user", "admin"]);
 export const conversationKindSchema = z.enum(["direct"]);
 export const securityModeSchema = z.enum([
   "transport_protected",
@@ -26,6 +27,7 @@ export const tombstoneTypeSchema = z.enum(["none", "deleted"]);
 
 export type AuthIntentPurpose = z.infer<typeof authIntentPurposeSchema>;
 export type AuthIntentChannel = z.infer<typeof authIntentChannelSchema>;
+export type UserRole = z.infer<typeof userRoleSchema>;
 export type ConversationKind = z.infer<typeof conversationKindSchema>;
 export type SecurityMode = z.infer<typeof securityModeSchema>;
 export type MessagePayloadFormat = z.infer<typeof messagePayloadFormatSchema>;
@@ -51,6 +53,7 @@ export const publicUserSchema = z.object({
   id: idSchema,
   primaryEmail: emailSchema,
   emailVerifiedAt: timestampSchema.nullable(),
+  role: userRoleSchema,
   friendCode: z.string().regex(friendCodePattern),
   handle: z.string().regex(handlePattern),
   profile: profileSchema
@@ -210,6 +213,11 @@ export const conversationReadSchema = z.object({
   lastReadMessageId: idSchema
 });
 
+export const adminListQuerySchema = z.object({
+  q: z.string().trim().max(80).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20)
+});
+
 export const friendSummarySchema = z.object({
   user: publicUserSchema,
   conversationId: idSchema.nullable(),
@@ -223,6 +231,107 @@ export const conversationSummarySchema = z.object({
   readState: readStateSchema.nullable(),
   unreadCount: z.number().int().nonnegative(),
   typingUserIds: z.array(idSchema)
+});
+
+export const adminOverviewSchema = z.object({
+  totals: z.object({
+    users: z.number().int().nonnegative(),
+    devices: z.number().int().nonnegative(),
+    activeSessions: z.number().int().nonnegative(),
+    conversations: z.number().int().nonnegative(),
+    messages: z.number().int().nonnegative(),
+    pendingFriendRequests: z.number().int().nonnegative(),
+    authIntentsLast24Hours: z.number().int().nonnegative()
+  }),
+  recentUsers: z.array(
+    z.object({
+      id: idSchema,
+      primaryEmail: emailSchema,
+      handle: z.string().regex(handlePattern),
+      displayName: z.string().min(1).max(48),
+      createdAt: timestampSchema,
+      emailVerifiedAt: timestampSchema.nullable()
+    })
+  ),
+  recentAuthIntents: z.array(
+    z.object({
+      id: idSchema,
+      email: emailSchema,
+      purpose: authIntentPurposeSchema,
+      channel: authIntentChannelSchema,
+      createdAt: timestampSchema,
+      expiresAt: timestampSchema,
+      consumedAt: timestampSchema.nullable(),
+      attempts: z.number().int().nonnegative()
+    })
+  )
+});
+
+export const adminUserSchema = z.object({
+  user: publicUserSchema,
+  createdAt: timestampSchema,
+  updatedAt: timestampSchema,
+  devicesCount: z.number().int().nonnegative(),
+  sessionsCount: z.number().int().nonnegative(),
+  sentMessagesCount: z.number().int().nonnegative(),
+  friendCodeRotationsCount: z.number().int().nonnegative(),
+  lastSeenAt: timestampSchema.nullable()
+});
+
+export const adminConversationSchema = z.object({
+  id: idSchema,
+  securityMode: securityModeSchema,
+  createdAt: timestampSchema,
+  updatedAt: timestampSchema,
+  messageCount: z.number().int().nonnegative(),
+  participants: z.array(
+    z.object({
+      id: idSchema,
+      displayName: z.string().min(1).max(48),
+      handle: z.string().regex(handlePattern),
+      primaryEmail: emailSchema
+    })
+  ),
+  lastMessage: z
+    .object({
+      id: idSchema,
+      preview: z.string(),
+      sentAt: timestampSchema,
+      deletedForEveryoneAt: timestampSchema.nullable()
+    })
+    .nullable()
+});
+
+export const adminConversationMessageSchema = z.object({
+  id: idSchema,
+  senderUserId: idSchema,
+  senderDisplayName: z.string().min(1).max(48),
+  text: z.string(),
+  sentAt: timestampSchema,
+  editedAt: timestampSchema.nullable(),
+  deletedForEveryoneAt: timestampSchema.nullable()
+});
+
+export const adminAuthIntentSchema = z.object({
+  id: idSchema,
+  email: emailSchema,
+  purpose: authIntentPurposeSchema,
+  channel: authIntentChannelSchema,
+  createdAt: timestampSchema,
+  expiresAt: timestampSchema,
+  consumedAt: timestampSchema.nullable(),
+  attempts: z.number().int().nonnegative(),
+  deviceName: z.string().nullable()
+});
+
+export const adminFriendCodeRotationSchema = z.object({
+  id: idSchema,
+  userId: idSchema,
+  primaryEmail: emailSchema,
+  handle: z.string().regex(handlePattern),
+  oldCode: z.string().regex(friendCodePattern),
+  newCode: z.string().regex(friendCodePattern),
+  rotatedAt: timestampSchema
 });
 
 export const serverSocketEventNames = {
@@ -256,4 +365,13 @@ export type ReadState = z.infer<typeof readStateSchema>;
 export type AuthSession = z.infer<typeof authSessionSchema>;
 export type FriendSummary = z.infer<typeof friendSummarySchema>;
 export type ConversationSummary = z.infer<typeof conversationSummarySchema>;
-
+export type AdminOverview = z.infer<typeof adminOverviewSchema>;
+export type AdminUser = z.infer<typeof adminUserSchema>;
+export type AdminConversation = z.infer<typeof adminConversationSchema>;
+export type AdminConversationMessage = z.infer<
+  typeof adminConversationMessageSchema
+>;
+export type AdminAuthIntent = z.infer<typeof adminAuthIntentSchema>;
+export type AdminFriendCodeRotation = z.infer<
+  typeof adminFriendCodeRotationSchema
+>;

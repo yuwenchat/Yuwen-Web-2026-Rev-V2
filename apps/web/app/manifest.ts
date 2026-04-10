@@ -7,15 +7,19 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "为安全而克制的聊天体验而设计。",
     start_url: "/",
     display: "standalone",
-    background_color: "#f5f1e8",
-    theme_color: "#18332d",
+    background_color: "#eef6fb",
+    theme_color: "#2d5f92",
     icons: [
       {
-        src: "/icon.svg",
-        sizes: "any",
-        type: "image/svg+xml"
+        src: "/yuwen-logo.png",
+        sizes: "192x192",
+        type: "image/png"
+      },
+      {
+        src: "/yuwen-logo.png",
+        sizes: "512x512",
+        type: "image/png"
       }
     ]
   };
 }
-

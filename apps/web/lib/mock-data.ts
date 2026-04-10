@@ -12,6 +12,7 @@ export const currentUser: PublicUser = {
   id: "user-shawn",
   primaryEmail: "shawn@feishu.example",
   emailVerifiedAt: new Date(now - 1000 * 60 * 60).toISOString(),
+  role: "admin",
   friendCode: "YW82Q4MN",
   handle: "shawn",
   profile: {
@@ -25,6 +26,7 @@ export const contacts: PublicUser[] = [
     id: "user-lin",
     primaryEmail: "lin@studio.example",
     emailVerifiedAt: new Date(now - 1000 * 60 * 60 * 2).toISOString(),
+    role: "user",
     friendCode: "YW4P8K7R",
     handle: "lin",
     profile: {
@@ -36,6 +38,7 @@ export const contacts: PublicUser[] = [
     id: "user-he",
     primaryEmail: "he@design.example",
     emailVerifiedAt: new Date(now - 1000 * 60 * 60 * 3).toISOString(),
+    role: "user",
     friendCode: "YW6V3M9Q",
     handle: "he",
     profile: {

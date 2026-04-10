@@ -4,6 +4,7 @@ export type RequestAuth = {
   userId: string;
   sessionId: string;
   deviceId: string;
+  role: "user" | "admin";
 };
 
 export const CurrentAuth = createParamDecorator(
@@ -12,4 +13,3 @@ export const CurrentAuth = createParamDecorator(
     return request.auth as RequestAuth;
   }
 );
-

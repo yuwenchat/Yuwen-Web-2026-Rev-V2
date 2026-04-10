@@ -3,6 +3,7 @@ import Link from "next/link";
 import { productPrinciples } from "@yuwen/design-system";
 
 import { AuthForm } from "../components/auth-form";
+import { BrandLogo } from "../components/brand-logo";
 
 export default function HomePage() {
   return (
@@ -10,24 +11,46 @@ export default function HomePage() {
       <div className="landing">
         <section className="poster">
           <div className="poster-top">
-            <div className="brand-mark">
-              <span className="brand-orb" />
-              <span>语闻</span>
-            </div>
+            <BrandLogo
+              caption="安静、可信的网页对话"
+              priority
+              size="md"
+            />
           </div>
 
           <div className="poster-middle">
             <p className="eyebrow">Private Conversations, Web First</p>
-            <h1 className="poster-title">让信任感先于噪音出现。</h1>
+            <h1 className="poster-title">让第一分钟先建立信任。</h1>
             <p className="poster-copy">
-              语闻把邮箱身份、friend code、正在输入、已读和多设备准备放进同一套克制的界面里。
-              首发版本先把可感知的安全、编辑删除和聊天流畅度做扎实，再平滑接入端到端加密。
+              语闻把邮箱身份、friend code、正在输入、已读和多设备协同准备放进同一套克制的界面里。
+              首发版本先把 onboarding、聊天流畅度、消息编辑删除和真实安全表达做扎实，再平滑接入端到端加密。
             </p>
+
+            <div aria-hidden="true" className="poster-stage">
+              <div className="poster-glow poster-glow-a" />
+              <div className="poster-glow poster-glow-b" />
+              <div className="poster-preview">
+                <div className="poster-preview-header">
+                  <span>Onboarding</span>
+                  <span>Encrypted-ready</span>
+                </div>
+                <div className="poster-preview-line long" />
+                <div className="poster-preview-line short" />
+                <div className="poster-preview-pill-row">
+                  <span className="security-pill">邮箱身份</span>
+                  <span className="status-pill">friend code</span>
+                </div>
+              </div>
+            </div>
 
             <div className="poster-grid">
               <div className="poster-chip">
                 <strong>邮箱验证码 + Magic Link</strong>
                 <span>保留密码入口，同时支持更轻的免密登录体验。</span>
+              </div>
+              <div className="poster-chip">
+                <strong>新用户 onboarding</strong>
+                <span>先认清身份与安全状态，再进入聊天，而不是一上来堆满功能。</span>
               </div>
               <div className="poster-chip">
                 <strong>friend code 可刷新</strong>
@@ -47,11 +70,17 @@ export default function HomePage() {
                 “端到端加密已开启”的措辞。
               </p>
               <div className="button-row">
+                <Link className="primary-button" href="/onboarding">
+                  查看 onboarding
+                </Link>
                 <Link className="primary-button" href="/inbox">
                   查看聊天主界面
                 </Link>
                 <Link className="secondary-button" href="/settings">
                   查看账户与安全设置
+                </Link>
+                <Link className="secondary-button" href="/admin">
+                  查看管理后台
                 </Link>
               </div>
             </div>
@@ -77,10 +106,12 @@ export default function HomePage() {
                 <li key={item}>{item}</li>
               ))}
             </ul>
+            <div className="notice">
+              新增的 onboarding 会把新用户路径和管理员第一次进入后台的路径分开讲清楚，减少首次使用时的迷失感。
+            </div>
           </div>
         </section>
       </div>
     </main>
   );
 }
-

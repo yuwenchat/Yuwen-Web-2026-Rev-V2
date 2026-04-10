@@ -23,6 +23,7 @@ export function toProtocolUser(user: PrismaUser): PublicUser {
     id: user.id,
     primaryEmail: user.primaryEmail,
     emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
+    role: lowerEnum(user.role),
     friendCode: user.friendCode,
     handle: user.handle,
     profile: {
@@ -93,4 +94,3 @@ export function toProtocolReadState(readState: PrismaReadState): ReadState {
     readAt: readState.readAt.toISOString()
   };
 }
-

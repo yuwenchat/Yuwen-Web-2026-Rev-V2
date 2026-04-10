@@ -49,7 +49,8 @@ export class SessionGuard implements CanActivate {
     request.auth = {
       userId: session.userId,
       sessionId: session.id,
-      deviceId: session.deviceId
+      deviceId: session.deviceId,
+      role: session.user.role === "ADMIN" ? "admin" : "user"
     };
 
     return true;

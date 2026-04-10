@@ -49,7 +49,14 @@ pnpm dev
 
 - Web 端已提供可交互的高保真演示界面，用共享 reducer 模拟聊天、编辑、删除、已读、typing、friend code 刷新等行为
 - API 层已搭建完整模块结构、核心 REST 路由、Socket Gateway、邮件 provider 接口和 Prisma schema
+- 管理后台已提供 `/admin` 页面和 `/admin/*` 接口，基于管理员账号角色访问，支持后台概览、用户检索、会话查看、认证记录和 friend code 轮换记录
 - E2EE 只做了协议与视觉预留，首版文案不会误导成“端对端加密已开启”
+
+管理员账号初始化方式：
+
+- 在环境变量里设置 `ADMIN_EMAILS="你的管理员邮箱"`
+- 用这个邮箱注册或登录语闻账号
+- 再访问 `/admin`，用这个账号的邮箱密码登录后台
 
 ## 部署文档
 

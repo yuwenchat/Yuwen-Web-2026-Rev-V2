@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { BrandLogo } from "../../../components/brand-logo";
+
 type VerifyPageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
 };
@@ -19,6 +21,12 @@ export default function VerifyPage({ searchParams }: VerifyPageProps) {
   return (
     <main className="app-page">
       <div className="verify-wrap">
+        <BrandLogo
+          caption="Magic Link 承接页"
+          className="verify-brand"
+          priority
+          size="md"
+        />
         <section className="surface panel">
           <div className="panel-header">
             <p className="eyebrow">Magic Link Callback</p>
@@ -61,4 +69,3 @@ export default function VerifyPage({ searchParams }: VerifyPageProps) {
     </main>
   );
 }
-

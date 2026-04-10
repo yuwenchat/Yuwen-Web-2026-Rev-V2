@@ -237,7 +237,7 @@ export function InboxDemo() {
             <div style={{ position: "relative" }}>
               <Search
                 size={16}
-                style={{ position: "absolute", left: 16, top: 16, color: "rgba(16, 35, 29, 0.45)" }}
+                style={{ position: "absolute", left: 16, top: 16, color: "rgba(16, 40, 68, 0.45)" }}
               />
               <input
                 className="input"

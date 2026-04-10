@@ -28,6 +28,11 @@ enum DeviceTrustState {
   PENDING
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 enum FriendRequestStatus {
   PENDING
   ACCEPTED
@@ -64,6 +69,7 @@ model User {
   id                String               @id @default(cuid())
   primaryEmail      String               @unique
   emailVerifiedAt   DateTime?
+  role              UserRole             @default(USER)
   friendCode        String               @unique
   handle            String               @unique
   displayName       String
@@ -240,4 +246,3 @@ model ReadState {
 
   @@unique([conversationId, userId])
 }
-

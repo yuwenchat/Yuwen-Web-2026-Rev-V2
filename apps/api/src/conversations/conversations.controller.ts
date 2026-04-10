@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -23,7 +24,9 @@ import { ConversationsService } from "./conversations.service.js";
 @Controller("conversations")
 export class ConversationsController {
   constructor(
+    @Inject(ConversationsService)
     private readonly conversationsService: ConversationsService,
+    @Inject(MessagesService)
     private readonly messagesService: MessagesService
   ) {}
 
@@ -98,4 +101,3 @@ export class ConversationsController {
     );
   }
 }
-

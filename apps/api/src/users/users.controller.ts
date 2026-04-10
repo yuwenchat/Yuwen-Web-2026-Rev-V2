@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { updateProfileSchema } from "@yuwen/protocol";
 
 import { CurrentAuth, type RequestAuth } from "../common/current-auth.js";
@@ -10,7 +10,7 @@ import { UsersService } from "./users.service.js";
 @UseGuards(SessionGuard)
 @Controller()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(@Inject(UsersService) private readonly usersService: UsersService) {}
 
   @Get("me")
   async me(@CurrentAuth() auth: RequestAuth) {
@@ -31,4 +31,3 @@ export class UsersController {
     return this.usersService.rotateFriendCode(auth.userId, getRequestMeta(request));
   }
 }
-

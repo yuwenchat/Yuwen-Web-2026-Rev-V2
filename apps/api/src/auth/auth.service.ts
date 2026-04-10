@@ -66,7 +66,7 @@ type PasswordLoginInput = {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(MAIL_PROVIDER) private readonly mailProvider: MailProvider
   ) {}
 

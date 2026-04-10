@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException
 } from "@nestjs/common";
@@ -14,7 +15,8 @@ import { serverSocketEventNames } from "@yuwen/protocol";
 @Injectable()
 export class MessagesService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(RealtimeGateway)
     private readonly realtimeGateway: RealtimeGateway
   ) {}
 

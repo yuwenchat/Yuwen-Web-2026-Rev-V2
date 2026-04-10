@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Inject, Param, Query, UseGuards } from "@nestjs/common";
 import { adminListQuerySchema } from "@yuwen/protocol";
 
 import { SessionGuard } from "../common/session.guard.js";
@@ -9,7 +9,7 @@ import { AdminService } from "./admin.service.js";
 @UseGuards(SessionGuard, AdminGuard)
 @Controller("admin")
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(@Inject(AdminService) private readonly adminService: AdminService) {}
 
   @Get("overview")
   async getOverview() {

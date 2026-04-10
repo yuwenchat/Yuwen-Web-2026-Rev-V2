@@ -27,7 +27,7 @@ import { AuthService } from "./auth.service.js";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
   @Post("register/request-code")
   async requestRegisterCode(@Body() body: unknown, @Req() request: any) {
@@ -160,4 +160,3 @@ export class AuthController {
     return this.authService.refresh(input.refreshToken, getRequestMeta(request));
   }
 }
-

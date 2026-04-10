@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Post, UseGuards } from "@nestjs/common";
 import { friendRequestCreateSchema } from "@yuwen/protocol";
 
 import { CurrentAuth, type RequestAuth } from "../common/current-auth.js";
@@ -9,7 +9,7 @@ import { FriendsService } from "./friends.service.js";
 @UseGuards(SessionGuard)
 @Controller("friends")
 export class FriendsController {
-  constructor(private readonly friendsService: FriendsService) {}
+  constructor(@Inject(FriendsService) private readonly friendsService: FriendsService) {}
 
   @Post("request")
   async requestFriend(
@@ -33,4 +33,3 @@ export class FriendsController {
     return this.friendsService.listFriends(auth.userId);
   }
 }
-

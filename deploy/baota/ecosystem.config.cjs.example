@@ -48,7 +48,7 @@ module.exports = {
       name: "yuwen-api",
       cwd: rootDir,
       script: "pnpm",
-      args: "--filter @yuwen/api start",
+      args: "--filter @yuwen/api start:prod",
       interpreter: "none",
       instances: 1,
       autorestart: true,

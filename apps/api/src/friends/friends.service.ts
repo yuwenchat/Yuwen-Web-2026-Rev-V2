@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException
 } from "@nestjs/common";
@@ -13,7 +14,8 @@ import { RealtimeGateway } from "../realtime/realtime.gateway.js";
 @Injectable()
 export class FriendsService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(RealtimeGateway)
     private readonly realtimeGateway: RealtimeGateway
   ) {}
 

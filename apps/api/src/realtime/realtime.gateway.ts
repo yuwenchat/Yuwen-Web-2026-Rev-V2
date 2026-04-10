@@ -1,5 +1,6 @@
 import {
   ConnectedSocket,
+  Inject,
   MessageBody,
   OnGatewayConnection,
   SubscribeMessage,
@@ -25,7 +26,7 @@ export class RealtimeGateway implements OnGatewayConnection {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async handleConnection(client: Socket): Promise<void> {
     const handshakeToken =
@@ -118,4 +119,3 @@ export class RealtimeGateway implements OnGatewayConnection {
     }
   }
 }
-

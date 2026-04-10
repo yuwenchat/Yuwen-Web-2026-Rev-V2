@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException
 } from "@nestjs/common";
@@ -13,7 +14,7 @@ import { PrismaService } from "../prisma/prisma.service.js";
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async getMe(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -123,4 +124,3 @@ export class UsersService {
     };
   }
 }
-

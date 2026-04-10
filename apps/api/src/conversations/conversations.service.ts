@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 
 import {
   toProtocolConversation,
@@ -10,7 +10,7 @@ import { PrismaService } from "../prisma/prisma.service.js";
 
 @Injectable()
 export class ConversationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async listConversations(userId: string) {
     const conversations = await this.prisma.conversation.findMany({

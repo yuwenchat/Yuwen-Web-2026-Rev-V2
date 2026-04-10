@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type {
   AdminAuthIntent,
   AdminConversation,
@@ -21,7 +21,7 @@ function lower(input: string | null | undefined): string {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async getOverview(): Promise<AdminOverview> {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1_000);

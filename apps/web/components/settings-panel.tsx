@@ -1,19 +1,36 @@
 "use client";
 
-import { startTransition, useDeferredValue, useState } from "react";
+import type { AuthSession } from "@yuwen/protocol";
+import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import { KeyRound, RefreshCcw, ShieldCheck } from "lucide-react";
 
 import { e2eeRoadmap, emojiFingerprintFromSeed } from "@yuwen/crypto";
 import { authEntryCopy, securityModeCopy } from "@yuwen/design-system";
+
+import {
+  authApi,
+  readUserSession
+} from "../lib/api-client";
 
 export function SettingsPanel() {
   const [displayName, setDisplayName] = useState("Shawn");
   const [bio, setBio] = useState("在语闻里把隐私感和简洁度一起做好。");
   const [handle, setHandle] = useState("shawn");
   const [friendCode, setFriendCode] = useState("YW82Q4MN");
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const deferredHandle = useDeferredValue(handle);
   const fingerprint = emojiFingerprintFromSeed(`settings:${friendCode}`);
+
+  useEffect(() => {
+    const persisted = readUserSession();
+
+    if (persisted) {
+      setSession(persisted);
+    }
+  }, []);
 
   function rotateFriendCode() {
     startTransition(() => {
@@ -28,6 +45,38 @@ export function SettingsPanel() {
       setNotice(
         `已模拟调用 /me/profile，新的语闻号会保存为 @${deferredHandle.replace(/^@+/, "")}。`
       );
+    });
+  }
+
+  function savePassword() {
+    if (!session?.accessToken) {
+      setNotice("请先通过验证码、Magic Link 或密码登录，再来补设置密码。");
+      return;
+    }
+
+    if (password.length < 8) {
+      setNotice("密码至少需要 8 位。");
+      return;
+    }
+
+    if (password !== passwordConfirm) {
+      setNotice("两次输入的密码不一致。");
+      return;
+    }
+
+    startTransition(() => {
+      void (async () => {
+        try {
+          await authApi.setPassword(session.accessToken, password);
+          setPassword("");
+          setPasswordConfirm("");
+          setNotice("密码已经设置成功。现在你可以回到 /admin 用邮箱和这个密码登录后台。");
+        } catch (error) {
+          setNotice(
+            error instanceof Error ? error.message : "设置密码失败，请稍后再试。"
+          );
+        }
+      })();
     });
   }
 
@@ -71,6 +120,51 @@ export function SettingsPanel() {
               onChange={(event) => setBio(event.target.value)}
             />
           </label>
+
+          <div className="surface" style={{ padding: 18, display: "grid", gap: 14 }}>
+            <div>
+              <p className="eyebrow">Password Setup</p>
+              <h3 className="section-title serif" style={{ fontSize: "1.6rem" }}>
+                给当前账号补一个后台可用的密码。
+              </h3>
+              <p className="muted">
+                {session?.user.primaryEmail
+                  ? `当前已识别登录邮箱：${session.user.primaryEmail}`
+                  : "如果你刚通过验证码或 Magic Link 注册，请先完成登录，系统会把会话保存在浏览器里。"}
+              </p>
+            </div>
+
+            <div className="settings-grid">
+              <label className="field">
+                <span className="label">新密码</span>
+                <input
+                  className="input"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="至少 8 位"
+                  type="password"
+                />
+              </label>
+
+              <label className="field">
+                <span className="label">确认密码</span>
+                <input
+                  className="input"
+                  value={passwordConfirm}
+                  onChange={(event) => setPasswordConfirm(event.target.value)}
+                  placeholder="再次输入密码"
+                  type="password"
+                />
+              </label>
+            </div>
+
+            <div className="button-row">
+              <button className="primary-button" onClick={savePassword} type="button">
+                <KeyRound size={16} />
+                设置密码
+              </button>
+            </div>
+          </div>
 
           <div className="code-display">
             <div>
@@ -152,4 +246,3 @@ export function SettingsPanel() {
     </section>
   );
 }
-

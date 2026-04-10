@@ -1,14 +1,24 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { startTransition, useDeferredValue, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition, useDeferredValue, useEffect, useState, useTransition } from "react";
 import { ArrowRight, Send, ShieldCheck } from "lucide-react";
 
 import { authEntryCopy } from "@yuwen/design-system";
 
+import { authApi, persistUserSession } from "../lib/api-client";
+
 type AuthMode = "password" | "code" | "magic-link";
+type AuthIntent = "login" | "register";
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "请求失败，请稍后再试。";
+}
 
 export function AuthForm() {
+  const router = useRouter();
+  const [intent, setIntent] = useState<AuthIntent>("login");
   const [mode, setMode] = useState<AuthMode>("password");
   const [email, setEmail] = useState("hello@yuwen.chat");
   const [password, setPassword] = useState("");
@@ -17,73 +27,164 @@ export function AuthForm() {
   const [isPending, beginTransition] = useTransition();
   const previewEmail = useDeferredValue(email);
 
+  useEffect(() => {
+    if (intent === "register" && mode === "password") {
+      setMode("code");
+    }
+  }, [intent, mode]);
+
   const modeMeta = authEntryCopy.find((entry) => entry.key === mode)!;
+  const visibleModes =
+    intent === "register"
+      ? authEntryCopy.filter((entry) => entry.key !== "password")
+      : authEntryCopy;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const nextEmail = previewEmail.trim().toLowerCase();
+
+    if (!nextEmail) {
+      setNotice("请先输入邮箱。");
+      return;
+    }
+
     beginTransition(() => {
-      if (mode === "password") {
-        setNotice(`已准备调用 /auth/login/password，目标邮箱为 ${previewEmail}。`);
-        return;
-      }
+      void (async () => {
+        try {
+          setNotice(null);
 
-      if (mode === "code") {
-        setNotice(
-          code
-            ? `已准备调用 /auth/login/confirm-code，验证码 ${code} 将在服务端做过期与次数校验。`
-            : `已准备调用 /auth/login/request-code，验证码会发送到 ${previewEmail}。`
-        );
-        return;
-      }
+          if (mode === "password") {
+            if (!password.trim()) {
+              setNotice("请输入密码。");
+              return;
+            }
 
-      setNotice(
-        `已准备调用 /auth/login/request-magic-link，Magic Link 会发送到 ${previewEmail} 并跳转到 /auth/verify。`
-      );
+            const session = await authApi.loginWithPassword(nextEmail, password);
+            persistUserSession(session);
+            setPassword("");
+            setNotice("登录成功，正在进入语闻。");
+            router.push("/inbox");
+            return;
+          }
+
+          if (mode === "code") {
+            if (code.trim()) {
+              const session =
+                intent === "register"
+                  ? await authApi.confirmRegisterCode(nextEmail, code.trim())
+                  : await authApi.confirmLoginCode(nextEmail, code.trim());
+
+              persistUserSession(session);
+              setCode("");
+              setNotice(
+                intent === "register"
+                  ? "注册完成，正在进入设置页补密码。"
+                  : "验证成功，正在进入语闻。"
+              );
+              router.push(
+                intent === "register" ? "/settings?setup=password" : "/inbox"
+              );
+              return;
+            }
+
+            const result =
+              intent === "register"
+                ? await authApi.requestRegisterCode(nextEmail)
+                : await authApi.requestLoginCode(nextEmail);
+
+            setNotice(
+              `${intent === "register" ? "注册" : "登录"}验证码已发送到 ${nextEmail}，有效期至 ${new Date(
+                result.expiresAt
+              ).toLocaleString("zh-CN")}`
+            );
+            return;
+          }
+
+          const result =
+            intent === "register"
+              ? await authApi.requestRegisterMagicLink(nextEmail)
+              : await authApi.requestLoginMagicLink(nextEmail);
+
+          setNotice(
+            `${intent === "register" ? "注册" : "登录"} Magic Link 已发送到 ${nextEmail}，有效期至 ${new Date(
+              result.expiresAt
+            ).toLocaleString("zh-CN")}。请去邮箱点击链接。`
+          );
+        } catch (error) {
+          setNotice(getErrorMessage(error));
+        }
+      })();
     });
   }
 
-  function simulateRegistration() {
+  function toggleIntent(nextIntent: AuthIntent) {
     startTransition(() => {
-      setMode("code");
+      setIntent(nextIntent);
       setCode("");
+      setPassword("");
       setNotice(
-        "注册流程默认建议先发验证码；如果要无密码注册，也可以改走 Magic Link。"
+        nextIntent === "register"
+          ? "注册建议先走验证码或 Magic Link。完成后会引导你立刻补一个密码。"
+          : "登录可以使用密码、验证码或 Magic Link。"
       );
     });
   }
+
+  const submitLabel =
+    mode === "password"
+      ? "登录"
+      : mode === "magic-link"
+        ? "发送 Magic Link"
+        : code.trim()
+          ? intent === "register"
+            ? "验证并注册"
+            : "验证并登录"
+          : "发送验证码";
 
   return (
     <div className="stack">
-      <div className="mode-switch">
+      <div className="mode-switch" role="tablist" aria-label="认证意图">
         <button
-          className={mode === "password" ? "active" : ""}
-          onClick={() => setMode("password")}
+          className={intent === "login" ? "active" : ""}
+          onClick={() => toggleIntent("login")}
           type="button"
         >
-          密码
+          登录
         </button>
         <button
-          className={mode === "code" ? "active" : ""}
-          onClick={() => setMode("code")}
+          className={intent === "register" ? "active" : ""}
+          onClick={() => toggleIntent("register")}
           type="button"
         >
-          验证码
+          注册
         </button>
-        <button
-          className={mode === "magic-link" ? "active" : ""}
-          onClick={() => setMode("magic-link")}
-          type="button"
-        >
-          Magic Link
-        </button>
+      </div>
+
+      <div className="mode-switch" role="tablist" aria-label="认证方式">
+        {visibleModes.map((entry) => (
+          <button
+            className={mode === entry.key ? "active" : ""}
+            key={entry.key}
+            onClick={() => setMode(entry.key)}
+            type="button"
+          >
+            {entry.key === "magic-link" ? "Magic Link" : entry.title.replace("登录", "")}
+          </button>
+        ))}
       </div>
 
       <div className="surface panel">
         <div className="panel-body stack">
           <div>
-            <p className="eyebrow">{modeMeta.title}</p>
-            <p className="muted">{modeMeta.description}</p>
+            <p className="eyebrow">
+              {intent === "register" ? "Register Flow" : "Login Flow"}
+            </p>
+            <p className="muted">
+              {intent === "register"
+                ? "先完成邮箱验证，再补一个密码作为长期兜底。"
+                : modeMeta.description}
+            </p>
           </div>
 
           <form className="stack" onSubmit={handleSubmit}>
@@ -113,7 +214,9 @@ export function AuthForm() {
 
             {mode === "code" ? (
               <label className="field">
-                <span className="label">验证码（留空则模拟发送）</span>
+                <span className="label">
+                  验证码{intent === "register" ? "（收到后填入完成注册）" : "（收到后填入完成登录）"}
+                </span>
                 <input
                   className="input mono"
                   value={code}
@@ -129,21 +232,23 @@ export function AuthForm() {
                 {mode === "magic-link" ? (
                   <>
                     <Send size={16} />
-                    发送 Magic Link
+                    {submitLabel}
                   </>
                 ) : (
                   <>
                     <ArrowRight size={16} />
-                    继续
+                    {submitLabel}
                   </>
                 )}
               </button>
               <button
                 className="secondary-button"
-                onClick={simulateRegistration}
+                onClick={() =>
+                  toggleIntent(intent === "login" ? "register" : "login")
+                }
                 type="button"
               >
-                切到注册建议路径
+                {intent === "login" ? "切到注册路径" : "切回登录路径"}
               </button>
             </div>
           </form>
@@ -154,7 +259,7 @@ export function AuthForm() {
               <strong>统一邮件认证策略</strong>
             </div>
             <div>
-              注册与登录都可以使用验证码和 magic link；密码登录则继续作为稳定兜底。
+              注册与登录都可以使用验证码和 Magic Link；注册完成后建议马上到设置页补一个密码。
             </div>
           </div>
 

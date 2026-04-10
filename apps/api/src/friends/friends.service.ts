@@ -35,7 +35,11 @@ export class FriendsService {
       throw new BadRequestException("You cannot add yourself.");
     }
 
-    const [lowId, highId] = [userId, targetUser.id].sort();
+    const sortedPair = [userId, targetUser.id].sort((left, right) =>
+      left.localeCompare(right)
+    );
+    const lowId = sortedPair[0]!;
+    const highId = sortedPair[1]!;
     const existingFriendship = await this.prisma.friendship.findUnique({
       where: {
         userLowId_userHighId: {
@@ -96,8 +100,15 @@ export class FriendsService {
       throw new NotFoundException("Friend request not found.");
     }
 
-    const [userLowId, userHighId] = [friendRequest.senderId, friendRequest.recipientId].sort();
-    const directPairKey = createDirectPairKey(friendRequest.senderId, friendRequest.recipientId);
+    const sortedPair = [friendRequest.senderId, friendRequest.recipientId].sort(
+      (left, right) => left.localeCompare(right)
+    );
+    const userLowId = sortedPair[0]!;
+    const userHighId = sortedPair[1]!;
+    const directPairKey = createDirectPairKey(
+      friendRequest.senderId,
+      friendRequest.recipientId
+    );
 
     await this.prisma.friendRequest.update({
       where: {

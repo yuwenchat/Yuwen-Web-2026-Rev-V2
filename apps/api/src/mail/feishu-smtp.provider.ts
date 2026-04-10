@@ -1,4 +1,6 @@
 import { Injectable } from "@nestjs/common";
+// nodemailer 在当前部署环境里没有额外类型包，这里直接按运行时模块使用。
+// @ts-ignore
 import nodemailer from "nodemailer";
 
 import { appEnv } from "../common/env.js";
@@ -66,4 +68,3 @@ export class FeishuSmtpProvider implements MailProvider {
     });
   }
 }
-

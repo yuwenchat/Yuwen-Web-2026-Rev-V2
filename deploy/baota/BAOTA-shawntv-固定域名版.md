@@ -325,14 +325,15 @@ pnpm db:push
 
 ---
 
-## 11. 构建前端
+## 11. 构建前端和 API
 
 ```bash
 cd /www/wwwroot/chat2.shawntv.co
 pnpm build:web
+pnpm --filter @yuwen/api build
 ```
 
-如果这里报错，先停下来，不要继续下一步。
+如果这里任意一步报错，先停下来，不要继续下一步。
 
 ---
 
@@ -357,6 +358,16 @@ nano ecosystem.config.cjs
 const rootDir = "/www/wwwroot/chat2.shawntv.co";
 ```
 
+再确认下面两行分别是：
+
+```js
+args: "--filter @yuwen/web exec next start --hostname 127.0.0.1 --port 3000",
+```
+
+```js
+args: "--filter @yuwen/api exec tsx dist/apps/api/src/main.js",
+```
+
 然后启动：
 
 ```bash
@@ -378,6 +389,18 @@ pm2 list
 
 - `yuwen-web` 是 `online`
 - `yuwen-api` 是 `online`
+
+本机再检查一次：
+
+```bash
+curl -I http://127.0.0.1:3000
+curl -i http://127.0.0.1:4000/me
+```
+
+你预期看到：
+
+- `3000` 返回网页响应
+- `4000/me` 返回 `401 Unauthorized` 也正常，说明 API 已经活了，只是还没登录
 
 ---
 
@@ -518,7 +541,9 @@ docker compose ps
 cd /www/wwwroot/chat2.shawntv.co
 git pull
 pnpm install
+pnpm db:generate
 pnpm build:web
+pnpm --filter @yuwen/api build
 pm2 restart yuwen-api
 pm2 restart yuwen-web
 ```
@@ -531,6 +556,7 @@ set -a
 source apps/api/.env.production
 set +a
 pnpm db:push
+pnpm --filter @yuwen/api build
 pm2 restart yuwen-api
 pm2 restart yuwen-web
 ```

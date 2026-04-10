@@ -111,14 +111,16 @@ set +a
 pnpm db:generate
 pnpm db:push
 pnpm build:web
-pm2 restart yuwen-api
+pnpm --filter @yuwen/api build
 pm2 restart yuwen-web
+pm2 restart yuwen-api
 ```
 
 如果这是第一次部署，还没启动过 PM2，那就执行：
 
 ```bash
 cd /www/wwwroot/chat2.shawntv.co
+cp deploy/baota/ecosystem.config.cjs.example ecosystem.config.cjs
 pm2 start ecosystem.config.cjs --env production
 pm2 save
 ```

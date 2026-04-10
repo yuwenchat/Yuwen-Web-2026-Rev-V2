@@ -428,14 +428,15 @@ pnpm db:push
 
 ---
 
-## 12. 构建前端
+## 12. 构建前端和 API
 
 ```bash
 cd /www/wwwroot/yuwen
 pnpm build:web
+pnpm --filter @yuwen/api build
 ```
 
-如果这里报错，不要继续做 PM2。先把构建错误解决。
+如果这里任意一步报错，不要继续做 PM2。先把构建错误解决。
 
 ---
 
@@ -465,6 +466,16 @@ const rootDir = "/www/wwwroot/yuwen";
 ```
 
 如果你的项目就放在这个目录，不用改。
+
+再确认下面两行分别是：
+
+```js
+args: "--filter @yuwen/web exec next start --hostname 127.0.0.1 --port 3000",
+```
+
+```js
+args: "--filter @yuwen/api exec tsx dist/apps/api/src/main.js",
+```
 
 ### 13.1 启动 PM2
 
@@ -499,8 +510,10 @@ pm2 logs yuwen-api
 
 ```bash
 curl -I http://127.0.0.1:3000
-curl -I http://127.0.0.1:4000
+curl -i http://127.0.0.1:4000/me
 ```
+
+如果第二条返回 `401 Unauthorized`，这是正常的，说明 API 已经启动成功。
 
 参考：
 

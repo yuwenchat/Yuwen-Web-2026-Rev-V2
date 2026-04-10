@@ -1,5 +1,9 @@
 # 语闻最简单部署教程
 
+纯小白如果只想照着点击和复制命令走，先看：
+
+- [deploy/baota/BAOTA-小白图形化版.md](/Users/shawn/Library/CloudStorage/OneDrive-Personal/文档/New project/deploy/baota/BAOTA-小白图形化版.md)
+
 适用场景：
 
 - 系统：`Ubuntu 22.04`

@@ -2,6 +2,10 @@
 
 这份文档是直接按你的域名写死的版本。
 
+如果你只想直接复制 `.env.production` 内容，不想自己拼配置，直接看：
+
+- [deploy/baota/最终可直接粘贴的配置-ShawnTV.md](/Users/shawn/Library/CloudStorage/OneDrive-Personal/文档/New project/deploy/baota/最终可直接粘贴的配置-ShawnTV.md)
+
 固定使用：
 
 - 前端域名：`chat2.shawntv.co`
@@ -177,7 +181,7 @@ pnpm install
 
 ```bash
 cd /www/wwwroot/chat2.shawntv.co
-cp deploy/baota/web.env.shawntv.production.example apps/web/.env.production
+cp deploy/baota/web.env.shawntv.最终填写版.example apps/web/.env.production
 ```
 
 复制完以后，不一定要用命令行改。
@@ -210,7 +214,7 @@ NEXT_PUBLIC_WS_URL="https://yuwenapi2.shawntv.co"
 
 ```bash
 cd /www/wwwroot/chat2.shawntv.co
-cp deploy/baota/api.env.shawntv.production.example apps/api/.env.production
+cp deploy/baota/api.env.shawntv.最终填写版.example apps/api/.env.production
 ```
 
 复制完以后，推荐你直接用宝塔图形界面修改：
